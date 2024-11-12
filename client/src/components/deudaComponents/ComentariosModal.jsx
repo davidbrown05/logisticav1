@@ -17,9 +17,11 @@ export const ComentariosModal = ({
   partnerInfo,
   setpartnerInfo,
   corridaIndex,
+  selectedRondaTab
 }) => {
   console.log("partnerInfo", partnerInfo);
   console.log("comentarios", comentarios);
+  console.log("comentariosCorridaIndex", selectedRondaTab)
   const [comentarioValue, setcomentarioValue] = useState("");
   const [checkPartner, setcheckPartner] = useState(false);
   const [loadingUpload, setloadingUpload] = useState(false);
@@ -51,7 +53,7 @@ export const ComentariosModal = ({
     setpartnerInfo({
       ...partnerInfo,
       corridas: partnerInfo.corridas.map((corrida, index) => {
-        if (index === corridaIndex) {
+        if (index === selectedRondaTab) {
           return {
             ...corrida,
             comentarios: nuevosComentarios,
@@ -119,17 +121,17 @@ export const ComentariosModal = ({
           <form onSubmit={onSubmit}>
             <div
               onClick={(e) => e.stopPropagation()}
-              className="form-container mt-10 flex flex-col items-center bg-[#f3f4f6] rounded-md"
+              className="form-container mt-10 flex flex-col items-center bg-[#f3f4f6] rounded-md w-[340px] md:w-[900px]"
             >
-              <div className="form-header bg-black text-white w-[1000px] h-10 p-2 rounded-tl-md rounded-tr-md flex items-center justify-between">
-                <h1> AGREGAR NUEVO COMENTARIO DE CORRIDA:</h1>
-                <div className="flex gap-3">
+              <div className="form-header bg-black text-white w-full h-10 p-2 rounded-tl-md rounded-tr-md flex items-center justify-between">
+                <h1 className="text-[10px] md:w-[15px]"> AGREGAR NUEVO COMENTARIO DE CORRIDA:</h1>
+                <div className="flex flex-col md:flex-row  gap-3">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
                     type="submit"
-                    className=" bg-green-500 rounded-lg px-4"
+                    className=" bg-green-500 rounded-lg px-4 text-[10px] md:text-[15px]"
                   >
                     AGREGAR
                   </button>
@@ -138,7 +140,7 @@ export const ComentariosModal = ({
                       setcomentarioValue("");
                       setopenModal(!openModal);
                     }}
-                    className=" bg-red-500 rounded-lg px-4"
+                    className=" bg-red-500 rounded-lg px-4 text-[10px] md:text-[15px]"
                   >
                     CANCELAR
                   </button>

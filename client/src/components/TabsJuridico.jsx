@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState,useContext } from "react";
 import { GastosJudiciales } from "./juridicoComponents/GastosJudiciales";
 import { DocumentosJuridicos } from "./juridicoComponents/DocumentosJuridicos";
 import { DatosGenerales } from "./juridicoComponents/DatosGenerales";
@@ -10,11 +10,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectAllPosts } from "../redux/juridico/postSlice";
 import { IoNotifications } from "react-icons/io5";
 import { Badge } from "@mui/material";
+import { LoaderModal } from "./LoaderModal";
+import { LoaderContext } from "../context/LoaderContext";
 
 export const TabsJuridico = ({ id }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const firstBtnRef = useRef();
   const posts = useSelector(selectAllPosts);
+
+  const {setloaderContext} = useContext(LoaderContext)
 
   // Función para filtrar tareas pasadas usando flatMap
   const filterPastDueTasks = (data) => {
@@ -94,9 +98,9 @@ export const TabsJuridico = ({ id }) => {
       case 0:
         return <DatosGenerales id={id} />;
       case 1:
-        return <SeguimientoTabs id={id} />;
+        return <SeguimientoTabs id={id} setloaderContext={setloaderContext} />;
       case 2:
-        return <GastosJudiciales id={id}/>;
+        return <GastosJudiciales id={id} setloaderContext={setloaderContext}/>;
       case 3:
         return <ObservacionesForm id={id} />;
       case 4:
@@ -140,6 +144,7 @@ export const TabsJuridico = ({ id }) => {
         {/* Mostrar contenido dinámico según el paso actual */}
         <div className="step-content  p-4 mt-1">{renderStepContent()}</div>
       </div>
+      <LoaderModal/>
     </>
   );
 };

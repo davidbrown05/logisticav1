@@ -1,22 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { FiEdit } from "react-icons/fi";
 import { FaTrashAlt } from "react-icons/fa";
-import {
-  selectAllLists,
-  getListsErrors,
-  getListsStatus,
-  fetchLists,
-  forceUpdateLists,
-} from "../../redux/juridico/deudaGlobalSlice";
+// import {
+//   selectAllLists,
+//   getListsErrors,
+//   getListsStatus,
+//   fetchLists,
+//   forceUpdateLists,
+// } from "../../redux/juridico/deudaGlobalSlice";
+import { DeudaGlobalContext } from "../../context/DeudaGlobalContext";
 
 export const DeudaGlobal = () => {
+  const {
+    deudaGlobalContext,
+    loadingdeudaGlobalContext,
+    setdeudaGlobalContext,
+  } = useContext(DeudaGlobalContext);
   const dispatch = useDispatch();
-  const lists = useSelector(selectAllLists);
-  const listsStatus = useSelector(getListsStatus);
-  const listsErors = useSelector(getListsErrors);
-  console.log("listaDeudas", lists);
+  // const lists = useSelector(selectAllLists);
+  // const listsStatus = useSelector(getListsStatus);
+  // const listsErors = useSelector(getListsErrors);
+  // console.log("listaDeudas", lists);
+  console.log("listaDeudasContext", deudaGlobalContext);
 
   const [loading, setloading] = useState(false);
   const [loadingUpload, setloadingUpload] = useState(false);
@@ -30,7 +37,8 @@ export const DeudaGlobal = () => {
   const isDisableMonto = true;
 
   // Aplana la estructura de deudaLista
-  const flattenedDeudaList = lists.flatMap((list) => list.deudaLista);
+  //const flattenedDeudaList = lists.flatMap((list) => list.deudaLista);
+  const flattenedDeudaList = deudaGlobalContext.flatMap((list) => list.deudaLista);
 
   const calcularPagos = (data) => {
     console.log("calculando pagos", data);
@@ -65,18 +73,17 @@ export const DeudaGlobal = () => {
     }
   };
 
-  useEffect(() => {
-    if (listsStatus === "idle") {
-      dispatch(fetchLists());
-    }
-    if (listsStatus === "succeeded") {
-      console.log("calcular datos");
-     
-    }
-  }, [listsStatus, dispatch]);
+  // useEffect(() => {
+  //   if (listsStatus === "idle") {
+  //     dispatch(fetchLists());
+  //   }
+  //   if (listsStatus === "succeeded") {
+  //     console.log("calcular datos");
+  //   }
+  // }, [listsStatus, dispatch]);
 
   useEffect(() => {
-    console.log("filteredData", flattenedDeudaList )
+    console.log("filteredData", flattenedDeudaList);
     calcularPagos(flattenedDeudaList);
   }, [flattenedDeudaList]);
 
@@ -102,8 +109,8 @@ export const DeudaGlobal = () => {
 
   return (
     <>
-     <div className="form-container mt-10 flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
-     <div className="form-header bg-black text-white w-full h-10 p-2 rounded-tl-md rounded-tr-md">
+      <div className="form-container mt-10 flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
+        <div className="form-header bg-black text-white w-full h-10 p-2 rounded-tl-md rounded-tr-md">
           DEUDA GLOBAL
         </div>
         <form className="  flex flex-col gap-5 mt-5 mb-5 font-semibold xl:items-end">

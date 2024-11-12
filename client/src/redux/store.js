@@ -11,10 +11,10 @@ import storage from 'redux-persist/lib/storage';
 // Combina los reducers en uno solo
 const rootReducer = combineReducers({
 user: useReducer,
-posts: postsReducer,
-lists: listsReducer,
-juridico: juridicoReducer, // Añade el reducer de los datos jurídicos
-pagosLists: pagosListReducer,
+//posts: postsReducer,
+//lists: listsReducer,
+//juridico: juridicoReducer,
+//pagosLists: pagosListReducer,
 
 });
 

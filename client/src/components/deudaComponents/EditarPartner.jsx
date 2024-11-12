@@ -1,20 +1,32 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import moment from "moment";
 import { PiWarningFill } from "react-icons/pi";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { toast } from "react-toastify";
+
 //import { PartnersContext } from "../../context/PartnersContext";
 
-export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTab }) => {
+export const EditarPartner = ({
+  partnerInfo,
+  partners,
+  setPartners,
+  setSelectedTab,
+  corridaIndex,
+  setpartnerInfo,
+}) => {
   // const { partners, loadingPartners, setPartners } =
   //   useContext(PartnersContext);
   const [partnerEdit, setpartnerEdit] = useState(partnerInfo);
   console.log("partnerInfo", partnerInfo);
+  console.log("editarCorridaIndex", corridaIndex);
   const [guardarButton, setguardarButton] = useState(false);
-  const [proxPagos, setProxPagos] = useState(partnerInfo.corridas[0].pagos);
+  const [proxPagos, setProxPagos] = useState(
+    partnerInfo.corridas[corridaIndex].pagos
+  );
   const [loadingPartner, setloadingPartner] = useState(false);
+  const [corridasPartner, setcorridasPartner] = useState(partnerInfo.corridas);
 
   const [inversionInicial, setinversionInicial] = useState(
     partnerEdit.inversionInicial
@@ -48,12 +60,9 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
 
   const onSubmit = handleSubmit((data) => {
     // console.log("formData", data);
-    data.fechaContratoVigente = moment(data.fechaContratoVigente).format(
-      "YYYY-MM-DD"
-    );
-    data.fechaInicioInversion = moment(data.fechaInicioInversion).format(
-      "YYYY-MM-DD"
-    );
+
+    data.fechaContratoVigente = moment(data.fechaContratoVigente).toISOString();
+    data.fechaInicioInversion = moment(data.fechaInicioInversion).toISOString();
 
     const suertePrincipal = parseFloat(
       data.suertePrincipal.replace(/\$|,/g, "")
@@ -68,12 +77,13 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
     data.inversionInicial = inversionInicial;
     data.suertePrincipal = suertePrincipal;
     data.porcentajeUtilidad = porcentajeUtilidad;
+
     const porcentaje = (suertePrincipal * porcentajeUtilidad) / 100;
     const totalReembolzo = inversionInicial + porcentaje;
 
     data.utilidad = parseFloat(porcentaje);
     data.totalReembolzo = totalReembolzo;
-    data.status = true;
+    data.status = "activo";
 
     setReembolso(totalReembolzo);
     setTotalUtilidad(porcentaje);
@@ -83,14 +93,15 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
     console.log("fechaInicio", fechaInicio);
     let fechaParcialidad = fechaInicio.clone();
     let pagos = [];
-    let corridas = [];
+    // let corridas = [];
+    //corridas = corridasPartner;
     let plazoText = "";
 
     const plazoMeses = data.plazo;
     const parcialidades = data.parcialidades;
     const utilidad = porcentajeUtilidad;
     const pagoMes = porcentaje / parcialidades;
-    let partnerInfo = [];
+    //let partnerInfo = [];
 
     const plazoPago = Math.floor(plazoMeses / parcialidades);
 
@@ -98,9 +109,10 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
       fechaParcialidad.add(plazoPago, "months");
       const pagoInfo = {
         _id: String(Math.random()).replace(".", ""),
+        ronda: corridasPartner.length,
         parcialidades: pagoMes,
         abono: 0,
-        fechaParaPago: fechaParcialidad.format("YYYY-MM-DD"),
+        fechaParaPago: fechaParcialidad.toISOString(),
         fechaPagoRealizado: "",
         abonos: [],
         status: "false",
@@ -111,8 +123,10 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
     }
 
     console.log("Pagos:", pagos);
+    const fechaFinalizacion = pagos[pagos.length - 1].fechaParaPago;
+    console.log("fechaFinlalizacion", fechaFinalizacion);
 
-    partnerInfo = {
+    const corridaActualizada = {
       _id: String(Math.random()).replace(".", ""),
       partner: data.partner,
       fechaInversionInicial: data.fechaInicioInversion,
@@ -120,6 +134,7 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
       tipoPago: data.tipoPago,
       suertePrincipal: suertePrincipal,
       inversionInicial: inversionInicial,
+      fechaFinalizacion: fechaFinalizacion,
       porcentajeUtilidad: porcentajeUtilidad,
       reembolzo: totalReembolzo,
       utilidad: data.utilidad,
@@ -131,9 +146,10 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
       check: false,
     };
 
-    corridas.push(partnerInfo);
+    // Actualizar la corrida en la posición correspondiente (corridaIndex)
+    let corridasActualizadas = [...partnerInfo.corridas]; // Clonamos las corridas actuales de partnerInfo
+    corridasActualizadas[corridaIndex] = corridaActualizada; // Actualizamos solo la corrida seleccionada
 
-    data.corridas = corridas;
     setProxPagos(pagos);
     // console.log("partnerInfo", corridas);
     //console.log("fechaPagos", pagos);
@@ -141,10 +157,26 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
     console.log("formData", data);
 
     if (checPartners) {
-      //  setloadingPartner(ture);
-      handlePartner(data);
+      setTimeout(() => {
+        // Actualizar el partnerInfo con las corridas actualizadas
+        const partnerInfoActualizado = {
+          ...partnerInfo,
+          corridas: corridasActualizadas, // Reemplazamos las corridas en partnerInfo
+        };
+
+        // Llamar al setPartnerInfo para actualizar
+        setpartnerInfo(partnerInfoActualizado);
+      }, 500);
     }
   });
+
+  useEffect(() => {
+    const newData = partnerInfo;
+    if (checPartners) {
+      console.log("rondaActualizada", newData);
+      handlePartner(newData)
+    }
+  }, [partnerInfo]);
 
   const handlePartner = async (data) => {
     const result = await Swal.fire({
@@ -174,7 +206,7 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
         // setPartners([...partners, responseUpdate]);
         setloadingPartner(false);
         toast.success("PARTNER ACTUALIZADO");
-        setSelectedTab(1)
+        setSelectedTab(1);
       } catch (error) {
         setloadingPartner(false);
         setchecPartners(false);
@@ -187,8 +219,8 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
   };
 
   return (
-    <div className="form-container mt-10 flex flex-col items-center bg-[#f3f4f6]">
-      <div className="form-header bg-black text-white w-[1000px] h-10 p-2 rounded-tl-md rounded-tr-md">
+    <div className="form-container mt-10 flex flex-col items-center bg-[#f3f4f6] w-[350px] lg:w-[1000px]">
+      <div className="form-header bg-black text-white w-full h-10 p-2 rounded-tl-md rounded-tr-md">
         EDITAR PARTNER
       </div>
       <button
@@ -201,7 +233,7 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
       {/* FORM */}
       <form
         onSubmit={onSubmit}
-        className=" grid grid-cols-3 items-center justify-between gap-10 mb-10"
+        className=" grid grid-cols-2 md:grid-cols-3 items-center justify-between gap-10 mb-10 p-2"
       >
         {/* primera fila */}
         <div className="flex flex-col">
@@ -370,7 +402,7 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
             {...register("parcialidades", { required: true })}
           />
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-col md:flex-row items-center gap-5">
           <button
             type="submit"
             className=" bg-yellow-500 text-white px-2 py-2 rounded-full shadow-lg flex  items-center gap-2"
@@ -391,7 +423,7 @@ export const EditarPartner = ({ partnerInfo, partners, setPartners,setSelectedTa
       </form>
 
       {/* TABLA DE FECHAS */}
-      <div className="w-[950px]">
+      <div className="w-[300px] md:w-[950px]">
         {proxPagos.length > 0 ? (
           <table className="w-full mt-4 bg-white  rounded-md shadow-md mb-4 text-center justify-center">
             <thead>

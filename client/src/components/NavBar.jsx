@@ -6,7 +6,9 @@ import {
   RiContactsBook2Fill,
   RiLoginBoxLine,
 } from "react-icons/ri";
-import { FaHome, FaChartLine } from "react-icons/fa";
+import { SlNotebook } from "react-icons/sl";
+
+import { FaHome, FaChartLine,FaUsers  } from "react-icons/fa";
 import { FaUsersBetweenLines, FaUsersGear } from "react-icons/fa6";
 import { BiSolidReport } from "react-icons/bi";
 import { MdOutlineMenuBook, MdAddHome } from "react-icons/md";
@@ -21,6 +23,9 @@ export const NavBar = ({ openSideMenu, setOpenSideMenu }) => {
   const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const location = useLocation();
+
+    // Verificar si el currentUser tiene el correo sergio@gmail.com
+    const isSergio = currentUser === "sergio@gmail.com";
   const sidebarOptions = [
     {
       icon: <FaHome className="text-2xl" />,
@@ -51,6 +56,16 @@ export const NavBar = ({ openSideMenu, setOpenSideMenu }) => {
       icon: <FaChartLine className="text-2xl" />,
       label: "DEUDA GLOBAL",
       to: "/deuda",
+    },
+    {
+      icon: <FaUsers  className="text-2xl" />,
+      label: "PARTNERS",
+      to: "/partners",
+    },
+    {
+      icon: <SlNotebook className="text-2xl" />,
+      label: "RECORDATORIOS",
+      to: "/recordatorios",
     },
     {
       icon: <RiLoginBoxLine className="text-2xl" />,

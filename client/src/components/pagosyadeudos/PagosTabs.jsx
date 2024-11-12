@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { ReciboPagos } from "./ReciboPagos";
 import { Pagos } from "./Pagos";
+import { ReciboPagosReactPdf } from "./ReciboPagosReactPdf";
 
 export const PagosTabs = ({id,product}) => {
   const { currentUser } = useSelector((state) => state.user);
@@ -15,7 +16,7 @@ export const PagosTabs = ({id,product}) => {
       case 0:
         return <Pagos setCurrentStep={setCurrentStep} setReciboInfo={setReciboInfo} currentUser={currentUser}/>; 
       case 1:
-        return <ReciboPagos setCurrentStep={setCurrentStep} reciboInfo={reciboInfo} product={product} />; 
+        return <ReciboPagosReactPdf setCurrentStep={setCurrentStep} reciboInfo={reciboInfo} product={product} />; 
 
       default:
         return null;

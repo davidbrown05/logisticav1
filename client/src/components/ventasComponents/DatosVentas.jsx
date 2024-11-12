@@ -2,12 +2,17 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { VentasContext } from "../../context/VentasContext";
+import { InmuebleContext } from "../../context/InmuebleContext";
 import { useForm } from "react-hook-form";
 import moment from "moment";
 import { DatePicker } from "@nextui-org/react";
 import { Input } from "@nextui-org/react";
 import { CompradoresModal } from "./CompradoresModal";
 import Swal from "sweetalert2";
+import { AsesoresModal } from "./AsesoresModal";
+
+import { useNavigate } from "react-router-dom";
+import { ButtonDuplicar } from "./ButtonDuplicar";
 
 export const DatosVentas = ({ id }) => {
   const {
@@ -17,7 +22,11 @@ export const DatosVentas = ({ id }) => {
     formState: { errors },
   } = useForm();
 
+  const navigate = useNavigate();
+
   const { ventas, isLoadingVentas, setVentas } = useContext(VentasContext);
+  const { inmuebles, loadingInmuebles, setInmuebles } =
+    useContext(InmuebleContext);
   console.log("ventasDataFromContext", ventas);
   const placements = [""];
 
@@ -30,10 +39,15 @@ export const DatosVentas = ({ id }) => {
   const [prevComprador, setPrevComprador] = useState(datosVentas.comprador);
   const [SelectedComprador, setSelectedComprador] = useState(false);
   const [openModal, setopenModal] = useState(false);
+  const [openModalAsesor, setopenModalAsesor] = useState(false);
   const [comprador, setComprador] = useState(datosVentas.comprador);
+  const [asesor, setAsesor] = useState(datosVentas.asesor);
   const [compradorRef, setCompradorRef] = useState(
     datosVentas.compradorRef || {}
   );
+
+  const [cancelarPropiedad, setcancelarPropiedad] = useState(false);
+  const [duplicarPropiedad, setduplicarPropiedad] = useState(false);
 
   console.log("datosVentasGeneralesData", datosVentas);
   console.log("compradorRef", compradorRef);
@@ -49,11 +63,14 @@ export const DatosVentas = ({ id }) => {
       setloadCompradores(false);
     }
   };
-
   useEffect(() => {
     getCompradores();
+  }, []);
+
+  useEffect(() => {
     let newData = datosVentas;
     console.log("newData", newData);
+
     if (checkventas) {
       handleUpdate(newData);
     }
@@ -64,7 +81,32 @@ export const DatosVentas = ({ id }) => {
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log("comprador", data.comprador);
+    console.log("DATA", data);
+
+    if (duplicarPropiedad) {
+      return;
+    }
+
+    // Verifica si cancelarPropiedad es true y muestra una confirmación
+    if (cancelarPropiedad) {
+      const result = await Swal.fire({
+        title: "CANCELAR PROPIEDAD?",
+        text: "No podras recuperar estos datos!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, cancelar",
+        cancelButtonText: "No, Cerrar",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+      });
+
+      if (!result.isConfirmed) {
+        setcancelarPropiedad(false)
+        return; // Si el usuario cancela, detiene la ejecución
+      }
+    }
+
+    // Verificación de compradorRef
     if (isEmptyObject(compradorRef)) {
       await Swal.fire({
         title: "Error",
@@ -74,24 +116,29 @@ export const DatosVentas = ({ id }) => {
         confirmButtonColor: "#000000",
       });
       return; // Detener la ejecución si no se ha agregado un comprador
-    } else {
-      const inputPrecio = data.precioFinal.replace(/[^0-9]/g, "");
-      data.precioInicial = datosVentas.precioInicial;
-      data.precioFinal = parseFloat(inputPrecio);
-      // Formatear la fecha límite desde el input
-      const fechaVentaInput = new Date(data.fechaVenta);
-      const fechaLimiteFormateada = fechaVentaInput.toISOString();
-      data.fechaVenta = fechaLimiteFormateada;
-
-      data.comprador = compradorRef.nombreCompleto;
-      data.compradorRef = compradorRef._id;
-
-      data._id = datosVentas._id;
-      console.log("datosVenta", data);
-      setcheckventas(true);
-
-      setDatosVentas(data);
     }
+
+    const inputPrecio = data.precioFinal.replace(/[^0-9]/g, "");
+    data.precioInicial = datosVentas.precioInicial;
+    data.precioFinal = parseFloat(inputPrecio);
+    // Formatear la fecha límite desde el input
+    const fechaVentaInput = new Date(data.fechaVenta);
+    const fechaLimiteFormateada = fechaVentaInput.toISOString();
+    data.fechaVenta = fechaLimiteFormateada;
+    data.asesor = asesor;
+    data.comprador = compradorRef.nombreCompleto;
+    data.compradorRef = compradorRef._id;
+
+    data._id = datosVentas._id;
+    console.log("datosVenta", data);
+
+    if (cancelarPropiedad) {
+      console.log("cancelando Propiedad...");
+      data.estatusVenta = "CANCELADA";
+    }
+    setcheckventas(true);
+
+    setDatosVentas(data);
   });
 
   //UPDATE INFORMATION
@@ -139,6 +186,13 @@ export const DatosVentas = ({ id }) => {
         updatedInmueble
       );
 
+      // Actualizar solo el inmueble correspondiente en la lista de inmuebles
+      // setInmuebles((prevInmuebles) =>
+      //   prevInmuebles.map((inmueble) =>
+      //     inmueble.id === id ? updatedInmueble : inmueble
+      //   )
+      // );
+
       console.log("inmuebleId", inmueble._id);
 
       // obtener los pagos correspondientes
@@ -185,10 +239,36 @@ export const DatosVentas = ({ id }) => {
 
       // Actualizar el contexto con los nuevos datos
       //setVentas(response.data[0]);
+
+      if (cancelarPropiedad) {
+        const responseJuridico = await axios.get(
+          `http://localhost:3000/api/juridicoData/${inmueble._id}`
+        );
+
+        const juridicoData = responseJuridico.data[0];
+        console.log("juridicoData", juridicoData);
+
+        // Actualizar el campo estatusVenta del inmueble
+        const updatedJuridico = {
+          ...juridicoData,
+          tareasLista: [],
+        };
+
+        // Actualizar los datos del Inmueble
+        const responseUpdateJuridico = await axios.put(
+          `http://localhost:3000/api/juridicoData/${juridicoData._id}`,
+          updatedJuridico
+        );
+      }
       setVentas(nuevosDatos);
 
       setLoading(false);
       toast.success("DATOS VENTA ACTUALIZADOS");
+      if (cancelarPropiedad) {
+        setTimeout(() => {
+          navigate("/inventario");
+        }, 500);
+      }
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -238,9 +318,13 @@ export const DatosVentas = ({ id }) => {
 
             <div className="flex flex-col">
               <label className="font-semibold">ASESOR</label>
-              <select
+              <input
                 {...register("asesor", { required: true })}
-                defaultValue={datosVentas.asesor}
+                value={asesor}
+                onClick={() => {
+                  setopenModalAsesor(!openModalAsesor);
+                }}
+                type="text"
                 className="border p-2 rounded-md shadow-sm"
                 // onChange={(e) => {
                 //   const newValue = e.target.value;
@@ -250,12 +334,7 @@ export const DatosVentas = ({ id }) => {
                 //   }));
                 //   setValue("asesor", newValue);
                 // }}
-              >
-                {/* Agrega las opciones de tu select */}
-                <option value="N/A">N/A</option>
-                <option value="SERGIO VILLA">SERGIO VILLA</option>
-                <option value="VENTAS LOGISITCA">VENTAS LOGISITCA</option>
-              </select>
+              ></input>
             </div>
 
             <div className="flex flex-col">
@@ -389,30 +468,35 @@ export const DatosVentas = ({ id }) => {
                 <option value="BANCARIA">BANCARIA</option>
                 <option value="CHEQUE">CHEQUE</option>
                 <option value="CONTADO">CONTADO</option>
+                <option value="FOVISSSTE">FOVISSSTE</option>
+                <option value="FOVISTE">FOVISTE</option>
+                <option value="INFONAVIT">INFONAVIT</option>
               </select>
             </div>
 
-            <div className="flex flex-col">
+            <div className="flex flex-col mb-4">
               <label className="font-semibold">ESTATUS VENTA</label>
               <select
                 {...register("estatusVenta", { required: true })}
                 defaultValue={datosVentas.estatusVenta}
-                className="border p-2 rounded-md shadow-sm"
-
-                // onChange={(e) => {
-                //   const newValue = e.target.value;
-                //   setDatosVentas((prevDatos) => ({
-                //     ...prevDatos,
-                //     estatusVenta: newValue,
-                //   }));
-                //   setValue("estatusVenta", newValue);
-                // }}
+                // disabled={datosVentas.estatusVenta === "CANCELADA"}
+                className={`border p-2 rounded-md shadow-sm ${
+                  datosVentas.estatusVenta === "CANCELADA"
+                    ? "bg-red-200 border-red-500 text-red-700"
+                    : ""
+                }`}
               >
-                {/* Agrega las opciones de tu select */}
+                {/* Opciones del select */}
                 <option value="N/A">N/A</option>
                 <option value="VENDIDA">VENDIDA</option>
                 <option value="APARTADA">APARTADA</option>
-                <option value="CANCELADA">CANCELADA</option>
+                <option value="NO VENDIBLE">NO VENDIBLE</option>
+                <option value="SOLICITUD DE REFERENCIAS BANCARIAS">
+                  SOLICITUD DE REFERENCIAS BANCARIAS
+                </option>
+                <option value="CANCELADA" disabled>
+                  CANCELADA
+                </option>
               </select>
             </div>
 
@@ -442,14 +526,25 @@ export const DatosVentas = ({ id }) => {
             </div>
 
             {/* Agrega los demás campos del formulario según sea necesario */}
-           
+
+            <button
+              type="submit"
+              className="bg-black text-white md:px-4 md:py-2  rounded "
+            >
+              ACTUALIZAR
+            </button>
+            {datosVentas.estatusVenta === "CANCELADA" ? (
+              <ButtonDuplicar setduplicarPropiedad={setduplicarPropiedad} id={id} />
+            ) : (
               <button
-                type="submit"
-                className="bg-black text-white md:px-4 md:py-2  rounded "
+                className="bg-red-500 text-white p-2 rounded-md shadow-sm hover:bg-red-600"
+                onClick={() => {
+                  setcancelarPropiedad(true);
+                }} // Usa setcancelarPropiedad tal como lo pediste
               >
-                ACTUALIZAR
+                Cancelar
               </button>
-            
+            )}
           </div>
         </div>
       </form>
@@ -458,6 +553,11 @@ export const DatosVentas = ({ id }) => {
         setopenModal={setopenModal}
         setComprador={setComprador}
         setCompradorRef={setCompradorRef}
+      />
+      <AsesoresModal
+        openModalAsesor={openModalAsesor}
+        setopenModalAsesor={setopenModalAsesor}
+        setAsesor={setAsesor}
       />
     </div>
   ) : (

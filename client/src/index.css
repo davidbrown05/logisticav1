@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer base {
+  :root {
+    --radius: 0.5rem
+  }
+}
+
+
+/* Personalización de la barra de desplazamiento */
+.modalPagosFinales::-webkit-scrollbar {
+  display: none;
+}
+
+.modalPagosFinales {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}

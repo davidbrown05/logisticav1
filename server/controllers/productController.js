@@ -145,13 +145,17 @@ const deleteProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const product = await Product.findById(id);
     //tomar la id de la imagen de cloudinary
-    const imgId = product.assetid;
+   
     if (!product) {
       res.status(404);
       throw new Error(`cannot find any product with ID ${id}`);
     }
 
-    await cloudinary.uploader.destroy(imgId);
+    // Verificar si el producto tiene un assetid antes de intentar eliminar la imagen en Cloudinary
+    const imgId = product.assetid;
+    if (imgId) {
+      await cloudinary.uploader.destroy(imgId);
+    }
     const rmProduct = await Product.findByIdAndDelete(id);
     res.status(200).json(rmProduct);
   } catch (error) {

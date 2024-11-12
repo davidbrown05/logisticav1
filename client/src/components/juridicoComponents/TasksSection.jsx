@@ -35,7 +35,7 @@ export const TasksSection = ({
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  
 
  
 
@@ -138,7 +138,7 @@ export const TasksSection = ({
       setJuridico(nuevosDatos);
 
       setcheckTareasData(false);
-      dispatch(forceUpdatePosts()); // Despachar la acción para agregar una nueva tarea
+     
       setLoading(false);
 
       toast.success("TAREAS ACTUALIZADAS");
@@ -241,7 +241,7 @@ export const TasksSection = ({
       // Actualizar el contexto con los nuevos datos
       // setJuridico(response.data);
       setJuridico(nuevosDatos);
-      dispatch(forceUpdatePosts()); // Despachar la acción para agregar una nueva tarea
+     
 
       setCheck(false);
       setLoading(false);

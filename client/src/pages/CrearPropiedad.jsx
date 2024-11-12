@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { CreateProperty } from "../components/crearPropiedadForms/CreateProperty";
 import { CreatePropertyCloud } from "../components/crearPropiedadForms/CreatePropertyCloud";
 import CreatePropertyOpt from "../components/crearPropiedadForms/CreatePropertyOpt";
+import { CreatePropBackend } from "../components/crearPropiedadForms/CreatePropBackend";
 
 export const CrearPropiedad = () => {
   
@@ -81,7 +82,8 @@ export const CrearPropiedad = () => {
   return (
     <>
       <div className=" mb-10">
-        <CreatePropertyCloud/> 
+      {/* <CreatePropBackend/> */}
+         <CreatePropertyCloud/>  
        {/* <CreatePropertyOpt/> */}
           
       </div>

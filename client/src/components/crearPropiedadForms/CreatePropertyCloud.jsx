@@ -16,8 +16,11 @@ export const CreatePropertyCloud = () => {
   const [isLoading, setisLoading] = useState(false);
   const [file, setFile] = useState(undefined);
   // const [defaultFile, setDefaultFile] = useState("noImage.jpg");
+  // const [defaultFile, setDefaultFile] = useState(
+  //   "https://res-console.cloudinary.com/ddjajfmtw/thumbnails/v1/image/upload/v1720735461/d2w1YmM2eHpnYnYzZWxsN3BiYng=/drilldown"
+  // );
   const [defaultFile, setDefaultFile] = useState(
-    "https://res-console.cloudinary.com/ddjajfmtw/thumbnails/v1/image/upload/v1720735461/d2w1YmM2eHpnYnYzZWxsN3BiYng=/drilldown"
+    "https://res.cloudinary.com/ddjajfmtw/image/upload/v1720735461/wl5bc6xzgbv3ell7pbbx.jpg"
   );
   const [fileChanged, setFileChanged] = useState(false);
   const [fileName, setFileName] = useState(undefined);
@@ -50,10 +53,16 @@ export const CreatePropertyCloud = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    console.log("nuevaImagen", file);
-    setFileName(file);
-    setDefaultFile(URL.createObjectURL(file));
-    setFileChanged(true);
+    if (file) {
+      
+      console.log("nuevaImagenSelected", file);
+      setFileName(file);
+      setDefaultFile(URL.createObjectURL(file));
+      setFileChanged(true);
+    } else {
+      console.log("No se seleccionó ningún archivo, manteniendo la imagen predeterminada");
+      // No hacemos cambios si no se selecciona un archivo
+    }
   };
 
   // Define constantes para estados y ciudades
@@ -153,7 +162,7 @@ export const CreatePropertyCloud = () => {
 
     if (fileChanged) {
       data.foto = fileName.name;
-      handleFileUpload(file, data);
+      handleFileUpload(fileName, data);
     } else {
       data.foto = defaultFile;
       data.assetid = "";
@@ -301,9 +310,15 @@ export const CreatePropertyCloud = () => {
   };
 
   const handleFileUpload = async (archivo, data) => {
+
+    if (!file) {
+      toast.error("No file selected for upload");
+      return null;
+    }
+
     const formData = new FormData();
     formData.append("file", archivo);
-    formData.append("upload_preset", "gpfngq7n");
+    formData.append("upload_preset", "snbschui");
     formData.append("api_key", "646432361532954");
 
     try {
@@ -311,6 +326,7 @@ export const CreatePropertyCloud = () => {
         "https://api.cloudinary.com/v1_1/ddjajfmtw/image/upload",
         { method: "POST", body: formData }
       );
+      
 
       const dataImagen = await res.json();
       console.log("datosImagen", dataImagen);

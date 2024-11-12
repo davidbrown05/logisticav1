@@ -83,7 +83,10 @@ export const PermisosComponent = ({ id }) => {
       );
 
       // Actualizar el contexto con los nuevos datos
-      setJuridico(response.data[0]);
+      console.log("responseJuridico", responseUpdate.data)
+      console.log("responsedata", response.data[0])
+    //  setJuridico(response.data[0]);
+      setJuridico(responseUpdate.data);
 
       setLoading(false);
       toast.success("DATOS GENERALES ACTUALIZADOS");

@@ -49,7 +49,7 @@ const datosEjemplo = [
   },
 ];
 
-export const GastosJudiciales = ({ id }) => {
+export const GastosJudiciales = ({ id,setloaderContext }) => {
   const [gastos, setGastos] = useState(0);
   const [switchComision, setSwitchCOmision] = useState(false);
   const { juridico, setJuridico, loadingJuridco } = useContext(JuridicoContext);
@@ -180,6 +180,7 @@ export const GastosJudiciales = ({ id }) => {
 
   const handleUpdate2 = async (newData) => {
     console.log("newData en el handle", newData);
+    setloaderContext(true)
     try {
       // Actualizar los datos en el servidor
       const responseUpdate = await axios.put(
@@ -226,10 +227,12 @@ export const GastosJudiciales = ({ id }) => {
 
       setCheckJuridico(false);
       setLoading(false);
+      setloaderContext(false)
       toast.success("GASTOS ACTUALIZADAS");
     } catch (error) {
       setCheckJuridico(false);
       setSwitchCOmision(false);
+      setloaderContex(false)
       console.log(error);
       toast.error(error.message);
     }

@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 export const Seguimiento = ({ id, setCurrentStep, setEditTask, currentUser }) => {
  
   const { juridico, setJuridico } = useContext(JuridicoContext);
-  const dispatch = useDispatch();
+  
   const [checkJuridico, setCheckJuridico] = useState(false);
   const [checkJuridicoDelte, setCheckJuridicoDelete] = useState(false);
 
@@ -73,7 +73,7 @@ export const Seguimiento = ({ id, setCurrentStep, setEditTask, currentUser }) =>
       // Actualizar el contexto con los nuevos datos
       // setJuridico(response.data[0]);
       setJuridico(nuevosDatos);
-      dispatch(forceUpdatePosts()); // Despachar la acción para agregar una nueva tarea
+     
 
       setCheckJuridico(false);
       toast.success("TAREAS ACTUALIZADAS");

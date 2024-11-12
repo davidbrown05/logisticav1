@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 import {
   selectAllPosts,
   getPostsErrors,
@@ -21,6 +22,10 @@ export const PostsList = () => {
   const [notificationShown, setNotificationShown] = useState(false);
   const [pastTasks, setPastTasks] = useState([]);
 
+  const [juridicoNot, setJuridicoNot] = useState([])
+  const [loadingJuridicoNot, setLoadingJuridicoNot] = useState(false)
+  let pastDueTasks;
+
   useEffect(() => {
     if (postsStatus === "idle") {
       dispatch(fetchPosts());
@@ -37,9 +42,39 @@ export const PostsList = () => {
     );
   };
 
+  
+
+
+  const fetchJuridico = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/juridicoData`);
+      console.log("juridicoNotData", response.data);
+      setJuridicoNot(response.data);
+      const pastDueTasks = filterPastDueTasks(response.data);
+      setPastTasks(pastDueTasks);
+      setLoadingJuridicoNot(true);
+      
+      if (pastDueTasks.length > 0 && !notificationShown) {
+        toast.warn(`Hay ${pastDueTasks.length} tarea(s) retrasada(s)`, {
+          position: toast.POSITION.TOP_LEFT,
+        });
+        setNotificationShown(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoadingJuridicoNot(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJuridico();
+  }, []);
+
   // Llamar a la función para obtener las tareas pasadas
-  const pastDueTasks = filterPastDueTasks(posts);
-  console.log("Tareas pasadas de fecha:", pastDueTasks);
+  //const pastDueTasks = filterPastDueTasks(posts);
+  
+
+  //console.log("Tareas pasadas de fecha:", pastDueTasks);
 
   // Función para mostrar notificaciones con retraso
   //    const showDelayedNotifications = (tasks) => {
@@ -56,30 +91,27 @@ export const PostsList = () => {
   //    };
 
   // Mostrar una notificación si hay tareas pasadas
-  useEffect(() => {
-    if (pastDueTasks.length > 0 && !notificationShown) {
-      setPastTasks(pastDueTasks);
-      toast.warn(`Hay ${pastDueTasks.length} tarea(s) retrasada(s)`, {
-        position: toast.POSITION.TOP_LEFT,
-      });
-    }
-    setNotificationShown(true); // Marcar la notificación como mostrada
-  }, [pastDueTasks]);
+  // useEffect(() => {
+  //   if (pastDueTasks.length > 0 && !notificationShown) {
+  //     setPastTasks(pastDueTasks);
+  //     toast.warn(`Hay ${pastDueTasks.length} tarea(s) retrasada(s)`, {
+  //       position: toast.POSITION.TOP_LEFT,
+  //     });
+  //   }
+  //   setNotificationShown(true); // Marcar la notificación como mostrada
+  // }, [pastDueTasks]);
 
-  // Agregar una función para forzar la actualización de los datos
-  const handleUpdatePosts = () => {
-    dispatch(forceUpdatePosts());
-  };
+  
 
   return (
     <>
     <div className="  xl:w-[600px] mb-10 " >
-      {postsStatus === "loading" ? (
+      {!loadingJuridicoNot  ? (
         <p>Loading...</p>
       ) : (
         <main className="flex flex-col items-center gap-8 mt-8">
           <h1 className="font-bold">TAREAS PASADAS</h1>
-          <button onClick={handleUpdatePosts} className="btn btn-primary">Actualizar Tareas</button>
+        
           {pastTasks.length === 0 ? (
             <p>Aún no hay tareas</p>
           ) : (

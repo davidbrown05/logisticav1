@@ -89,7 +89,7 @@ export const AdeudosLista = () => {
     };
   }, [adeudosData]);
 
-  const handleUpdate = async (newData) => {
+  const handleUpdate1 = async (newData) => {
     console.log("newData en el handle", newData);
     try {
       // Actualizar los datos en el servidor
@@ -125,6 +125,59 @@ export const AdeudosLista = () => {
       console.log(error);
       toast.error(error.message);
     }
+  };
+  
+  const handleUpdate = async (newData) => {
+    console.log("newData en el handle", newData);
+
+    const updatePromise = async () => {
+      try {
+        // Actualizar los datos en el servidor
+        const responseUpdate = await axios.put(
+          `http://localhost:3000/api/adeudosData/${adeudosData._id}`,
+          newData
+        );
+  
+        const nuevosDatos = await responseUpdate.data;
+        console.log("datos actualizados", nuevosDatos);
+  
+        // Volver a obtener los datos del servidor después de la actualización
+        const response = await axios.get(
+          `http://localhost:3000/api/adeudosData/${newData._id}`
+        );
+        
+        // Actualizar el contexto con los nuevos datos
+        setAdeudos(nuevosDatos);
+  
+        if (checkAdeudos) {
+          toast.success("NUEVO ADEUDO AGREGADO");
+        } else if (checkAdeudosDelete) {
+          toast.success("ADEUDO ELIMINADO");
+        }
+  
+        setCheckAdeudos(false);
+        setcheckAdeudosDelete(false);
+        setloadingUpload(false);
+        
+        return response.data; // Retorna la respuesta para indicar éxito
+      } catch (error) {
+        setCheckAdeudos(false);
+        setcheckAdeudosDelete(false);
+        setloadingUpload(false);
+        console.log(error);
+        throw error; // Lanza el error para que se maneje en el toast
+      }
+    };
+  
+    // Usa toast.promise para manejar las notificaciones basadas en la promesa
+    toast.promise(
+      updatePromise(),
+      {
+        pending: 'Actualizando datos...',
+        success: 'Datos actualizados con éxito 👌',
+        error: 'Error al actualizar los datos 🤯'
+      }
+    );
   };
 
   //-----------------------------------------------------------------------FUNCIONES PARA BORRAR PAGOS

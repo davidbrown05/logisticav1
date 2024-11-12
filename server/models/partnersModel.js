@@ -15,6 +15,14 @@ const PartnersSchema = new mongoose.Schema(
       required: false,
     },
 
+    assetid: {
+      type: String,
+      required: false,
+    },
+    documento: {
+      type: String,
+      required: false,
+    },
     tipoPago: {
       type: String,
       required: false,
@@ -52,8 +60,12 @@ const PartnersSchema = new mongoose.Schema(
       type: Array,
       required: false,
     },
+    pagosFinales: {
+      type: Array,
+      required: false,
+    },
     status: {
-      type: Boolean,
+      type: String,
       required: false,
     },
   },

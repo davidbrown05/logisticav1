@@ -10,6 +10,10 @@ const InmuebleProvider = ({ children }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
 
+  const origen = window.origin
+
+  console.log("window", origen)
+
   const fetchProducts = async (page = 1) => {
     try {
       // const response = await axios.get("http://localhost:3000/api/products");

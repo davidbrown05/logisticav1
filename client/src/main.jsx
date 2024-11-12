@@ -11,10 +11,14 @@ import { PersistGate } from "redux-persist/integration/react";
 import { NextUIProvider } from "@nextui-org/react";
 //import JuridicoProvider from "./context/JuridicoContext.jsx";
 import { juridicoStore } from "./redux/juridicoStore.js";
+import RecordatoriosProvider from "./context/RecordatoriosContext.jsx";
+import { LoaderProvider } from "./context/LoaderContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
+  <LoaderProvider>
+  <RecordatoriosProvider>
   <AuthProvider>
-    <InmuebleProvider>
+   
       <BrowserRouter>
        
           <Provider store={store}>
@@ -26,6 +30,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           </Provider>
        
       </BrowserRouter>
-    </InmuebleProvider>
+   
   </AuthProvider>
+  </RecordatoriosProvider>
+  </LoaderProvider>
 );

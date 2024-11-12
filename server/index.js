@@ -1,4 +1,5 @@
 require("dotenv").config();
+const morgan = require("morgan")
 const express = require("express");
 const mongoose = require("mongoose");
 const productRoute = require("./routes/productRoute");
@@ -15,6 +16,9 @@ const authRouter = require("./routes/authRoute");
 const permisosRouter = require("./routes/permisosRoute");
 const reporteJuridicoRoute = require("./routes/reporteJuridicoRoute");
 const atrasoJuridico = require("./routes/atrasoJuridicoRoute");
+const juridicoNot = require("./routes/juridicoNotRoute");
+const pagosNot = require("./routes/pagosNotRoute");
+const recordatoriosRouter  = require("./routes/recordatoriosRoute")
 const errorMiddleware = require("./middleware/errorMiddleware");
 const cors = require("cors");
 const MenuModel = require("./models/Property");
@@ -32,14 +36,18 @@ var corsOptions = {
   credentials: true,
 };
 
+
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(morgan("dev"))
 
 //routes
 
 app.use("/api/products", productRoute);
+app.use("/api/recordatorios", recordatoriosRouter);
 app.use("/api/partners", partnersRoute);
 app.use("/api/comprador", compradorRoute);
 app.use("/api/juridicoData", juridicoRoute);
@@ -52,7 +60,9 @@ app.use("/api/permisosData", permisosRouter);
 app.use("/api/usersData", userRoute);
 app.use("/api/auth", authRouter);
 app.use("/api/reportejuridico", reporteJuridicoRoute);
-app.use("/api/atrasojuridico", atrasoJuridico);
+
+app.use("/api/juridiconot", juridicoNot);
+app.use("/api/pagosnot", pagosNot);
 
 app.get("/", (req, res) => {
   res.send("hello node api");

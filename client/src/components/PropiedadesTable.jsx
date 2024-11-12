@@ -47,14 +47,16 @@ export const PropiedadesTable = () => {
 
   function getStatusColorClass(statusVenta) {
     switch (statusVenta) {
-      case "cancelado":
+      case "CANCELADA":
         return "bg-red-300";
       case "PENDIENTE":
         return "bg-yellow-100";
       case "VENDIDA":
         return "bg-green-300";
-      case "disponible":
+      case "DISPONIBLE":
         return "bg-gray-300";
+      case "NO DISPONIBLE":
+        return "bg-yellow-200";
       // Agrega más casos según sea necesario para otros estados
       default:
         return "";

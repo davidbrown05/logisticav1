@@ -33,6 +33,8 @@ export const Calendario = ({
   const [checkPagosDelete, setcheckPagosDelete] = useState(false);
   const [cantidad, setCantidad] = useState("");
 
+  console.log("calendrarioComprador", product.compradorRef);
+
   const {
     register,
     handleSubmit,
@@ -132,9 +134,12 @@ export const Calendario = ({
     data.fechaLimite = fechaLimiteFormateada; // Asignar la fecha límite formateada
     data.status = "ACTIVA";
     data.url = `http://localhost:5173/pagosadeudos/${product._id}`;
-    data.direccion = product.direccion;
-    data.comprador = product.comprador;
-    data.telefono = comprador.phone;
+    data.direccion = product.compradorRef.direccion;
+    // data.direccion = product.direccion;
+    data.comprador = product.compradorRef.firstName;
+    // data.comprador = product.comprador;
+    data.telefono = product.compradorRef.phone;
+    //  data.telefono = comprador.phone;
     console.log("formData", data);
 
     const newArrayObjeto = [...pagosData.calendarioLista];
@@ -151,22 +156,22 @@ export const Calendario = ({
     setCheckPagos(true);
   });
 
-  useEffect(() => {
-    const fetchCompradorData = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/comprador");
-        const compradorData = response.data.find(
-          (c) => c.nombreCompleto === product.comprador
-        );
-        console.log("compradorData", compradorData);
-        setComprador(compradorData);
-      } catch (error) {
-        console.error("Error fetching comprador data:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCompradorData = async () => {
+  //     try {
+  //       const response = await axios.get("http://localhost:3000/api/comprador");
+  //       const compradorData = response.data.find(
+  //         (c) => c.nombreCompleto === product.comprador
+  //       );
+  //       console.log("compradorData", compradorData);
+  //       setComprador(compradorData);
+  //     } catch (error) {
+  //       console.error("Error fetching comprador data:", error);
+  //     }
+  //   };
 
-    fetchCompradorData();
-  }, [product.comprador]);
+  //   fetchCompradorData();
+  // }, [product.comprador]);
 
   // Ordenar las tareas por fecha límite de menor a mayor
   const sortedTasks = tasks.slice().sort((a, b) => {
@@ -178,11 +183,11 @@ export const Calendario = ({
   return (
     <DndProvider backend={HTML5Backend}>
       <>
-      <div className="form-container mt-10 flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
+        <div className="form-container  flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
           {/* Formulario para agregar observaciones */}
           <form onSubmit={onSubmit}>
-          <div className="form-container mt-10 flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
-          <div className="form-header bg-black text-white w-full h-10 p-2 rounded-tl-md rounded-tr-md">
+            <div className="form-container  flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
+              <div className="form-header bg-black text-white w-full h-10 p-2 rounded-tl-md rounded-tr-md">
                 CALENDARIO DE PAGOS
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-10  p-6 ">

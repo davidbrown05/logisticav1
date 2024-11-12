@@ -25,8 +25,11 @@ import Permisos from "./pages/Permisos";
 import PermisosDnD from "./pages/PermisosDnd";
 import Adeudos from "./pages/Adeudos";
 import EditarPropiedad from "./pages/EditarPropiedad";
-import EditarComprador from "./pages/EditarComprador"
-import EditarUsuario from "./pages/EditarUsuario"
+import EditarComprador from "./pages/EditarComprador";
+import EditarUsuario from "./pages/EditarUsuario";
+import Recordatorios from "./pages/Recordatorios";
+import Partners from "./pages/Partners";
+import InmuebleProvider from "./context/InmuebleContext";
 
 function App() {
   const [openSideMenu, setOpenSideMenu] = useState(false);
@@ -41,62 +44,71 @@ function App() {
       {!isLoginPage && (
         <Header openSideMenu={openSideMenu} setOpenSideMenu={setOpenSideMenu} />
       )}
-
-      <Routes>
-        <Route path="/" element={<Login></Login>}></Route>
-        <Route element={<ReduxPrivateRoute />}>
-          <Route
-            path="crear"
-            element={<CrearPropiedad></CrearPropiedad>}
-          ></Route>
-          <Route path="usuarios" element={<Usuarios></Usuarios>}></Route>
-          <Route path="reportes" element={<Reportes></Reportes>}></Route>
-          <Route path="signup" element={<Signup></Signup>}></Route>
-          <Route
-            path="compradores"
-            element={<Compradores></Compradores>}
-          ></Route>
-          <Route
-            path="crearcomprador"
-            element={<CrearComprador></CrearComprador>}
-          ></Route>
-          <Route
-            path="inventario"
-            element={<Propiedades></Propiedades>}
-          ></Route>
-          <Route path="editar/:id" element={<EditarPropiedad></EditarPropiedad>}></Route>
-          <Route path="juridico/:id" element={<Juridico></Juridico>}></Route>
-          <Route path="ventas/:id" element={<Ventas></Ventas>}></Route>
-          <Route
-            path="pagosadeudos/:id"
-            element={<PagosyAdeudos></PagosyAdeudos>}
-          ></Route>
-          <Route path="adeudos/:id" element={<Adeudos></Adeudos>}></Route>
-          <Route
-            path="propertydeuda/:id"
-            element={<PropertyDeuda></PropertyDeuda>}
-          ></Route>
-          <Route
-            path="comisiones/:id"
-            element={<Comisiones></Comisiones>}
-          ></Route>
-          <Route path="deuda" element={<Deuda></Deuda>}></Route>
-          <Route path="permisos/:id" element={<Permisos></Permisos>}></Route>
-          <Route
-            path="permisos1/:id"
-            element={<PermisosDnD></PermisosDnD>}
-          ></Route>
-          <Route
-            path="editarcomprador/:id"
-            element={<EditarComprador></EditarComprador>}
-          ></Route>
-          <Route
-            path="editarusuario/:id"
-            element={<EditarUsuario></EditarUsuario>}
-          ></Route>
-        </Route>
-        <Route path="/*" element={<Navigate to="/"></Navigate>}></Route> 
-      </Routes>
+      <InmuebleProvider>
+        <Routes>
+          <Route path="/" element={<Login></Login>}></Route>
+          <Route element={<ReduxPrivateRoute />}>
+            <Route
+              path="crear"
+              element={<CrearPropiedad></CrearPropiedad>}
+            ></Route>
+            <Route path="usuarios" element={<Usuarios></Usuarios>}></Route>
+            <Route path="reportes" element={<Reportes></Reportes>}></Route>
+            <Route path="signup" element={<Signup></Signup>}></Route>
+            <Route
+              path="compradores"
+              element={<Compradores></Compradores>}
+            ></Route>
+            <Route
+              path="crearcomprador"
+              element={<CrearComprador></CrearComprador>}
+            ></Route>
+            <Route
+              path="inventario"
+              element={<Propiedades></Propiedades>}
+            ></Route>
+            <Route
+              path="recordatorios"
+              element={<Recordatorios></Recordatorios>}
+            ></Route>
+            <Route path="partners" element={<Partners></Partners>}></Route>
+            <Route
+              path="editar/:id"
+              element={<EditarPropiedad></EditarPropiedad>}
+            ></Route>
+            <Route path="juridico/:id" element={<Juridico></Juridico>}></Route>
+            <Route path="ventas/:id" element={<Ventas></Ventas>}></Route>
+            <Route
+              path="pagosadeudos/:id"
+              element={<PagosyAdeudos></PagosyAdeudos>}
+            ></Route>
+            <Route path="adeudos/:id" element={<Adeudos></Adeudos>}></Route>
+            <Route
+              path="propertydeuda/:id"
+              element={<PropertyDeuda></PropertyDeuda>}
+            ></Route>
+            <Route
+              path="comisiones/:id"
+              element={<Comisiones></Comisiones>}
+            ></Route>
+            <Route path="deuda" element={<Deuda></Deuda>}></Route>
+            <Route path="permisos/:id" element={<Permisos></Permisos>}></Route>
+            <Route
+              path="permisos1/:id"
+              element={<PermisosDnD></PermisosDnD>}
+            ></Route>
+            <Route
+              path="editarcomprador/:id"
+              element={<EditarComprador></EditarComprador>}
+            ></Route>
+            <Route
+              path="editarusuario/:id"
+              element={<EditarUsuario></EditarUsuario>}
+            ></Route>
+          </Route>
+          <Route path="/*" element={<Navigate to="/"></Navigate>}></Route>
+        </Routes>
+      </InmuebleProvider>
 
       <div>
         <ToastContainer />

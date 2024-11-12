@@ -76,6 +76,7 @@ export const Usuarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showPassword, setShowPassword] = useState([]);
 
   // const getUsuarios = async () => {
   //   try {
@@ -90,6 +91,13 @@ export const Usuarios = () => {
   //     setisLoading(false);
   //   }
   // };
+
+ // Función para alternar la visibilidad de la contraseña
+ const togglePasswordVisibility = (index) => {
+  setShowPassword((prev) =>
+    prev.map((visible, i) => (i === index ? !visible : visible))
+  );
+};
 
   const getUsuarios = async () => {
     try {
@@ -110,6 +118,11 @@ export const Usuarios = () => {
   useEffect(() => {
     getUsuarios();
   }, [page]);
+
+   // Sincronizar `showPassword` con `usuarios` cuando cambie
+   useEffect(() => {
+    setShowPassword(Array(usuarios.length).fill(false));
+  }, [usuarios]);
 
   const eliminarUsuario = async (index, user) => {
     console.log("index", index);
@@ -161,7 +174,6 @@ export const Usuarios = () => {
     setPage(newPage);
   };
 
-
   return (
     <>
       <div className="flex flex-col w-full max-w-[1500px] mx-auto p-5">
@@ -200,12 +212,24 @@ export const Usuarios = () => {
               <tbody>
                 {usuarios.map((comprador, index) => (
                   <tr key={index} className="hover:bg-gray-100">
-                    <td className="border p-3 text-center">{comprador.username}</td>
-                    <td className="border p-3 text-center">{comprador.email}</td>
-                    <td className="border p-3 text-center">{comprador.password}</td>
+                    <td className="border p-3 text-center">
+                      {comprador.username}
+                    </td>
+                    <td className="border p-3 text-center">
+                      {comprador.email}
+                    </td>
+                    <td className="border p-3 text-center">
+                      {showPassword[index] ? comprador.password : "••••••••"}
+                      <button
+                        onClick={() => togglePasswordVisibility(index)}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        {showPassword[index] ? "Ocultar" : "Ver"}
+                      </button>
+                    </td>
                     <td className="border p-3 text-center">
                       <Link to={`/permisos1/${comprador._id}`}>
-                      <button className="hidden md:block bg-black text-white px-2 py-1 rounded shadow-lg">
+                        <button className="hidden md:block bg-black text-white px-2 py-1 rounded shadow-lg">
                           Permisos
                         </button>
                       </Link>
