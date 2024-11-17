@@ -1,13 +1,21 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+  useCallback,
+} from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Rings } from "react-loader-spinner";
 import { InmuebleContext } from "../../context/InmuebleContext";
+import { useDropzone } from "react-dropzone";
+import { IoMdCloseCircle } from "react-icons/io";
 
 export const CreatePropBackend = () => {
-    const { inmuebles, loadingInmuebles, setInmuebles } =
+  const { inmuebles, loadingInmuebles, setInmuebles } =
     useContext(InmuebleContext);
   const [precio, setPrecio] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -15,6 +23,9 @@ export const CreatePropBackend = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setisLoading] = useState(false);
   const [file, setFile] = useState(undefined);
+  const [foto, setFoto] = useState([]);
+  const [dropZoneChange, setdropZoneChange] = useState(false);
+
   // const [defaultFile, setDefaultFile] = useState("noImage.jpg");
   // const [defaultFile, setDefaultFile] = useState(
   //   "https://res-console.cloudinary.com/ddjajfmtw/thumbnails/v1/image/upload/v1720735461/d2w1YmM2eHpnYnYzZWxsN3BiYng=/drilldown"
@@ -26,6 +37,27 @@ export const CreatePropBackend = () => {
   const [fileName, setFileName] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [loadingUpload, setloadingUpload] = useState(false);
+
+  // const onDrop = useCallback((acceptedFiles) => {
+  //   console.log("acceptFiles", acceptedFiles[0]);
+  //   setdocumento(acceptedFiles[0]);
+  // }, []);
+
+  // Función de onDrop para manejar la imagen seleccionada
+  const onDrop = useCallback((acceptedFiles) => {
+    console.log("acceptedFiles", acceptedFiles);
+    setdropZoneChange(true);
+    setFoto(acceptedFiles[0]);
+    const file = acceptedFiles[0];
+    if (file) {
+      setSelectedImage(URL.createObjectURL(file)); // Mostrar vista previa
+      setDefaultFile(URL.createObjectURL(file)); // Mostrar vista previa
+      setFileName(file); // Guardar el archivo para subir luego
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive, acceptedFiles } =
+    useDropzone({ onDrop });
 
   const {
     register,
@@ -104,7 +136,7 @@ export const CreatePropBackend = () => {
     "CARLOS QUEJEIRO",
     "CARLOS SAUCEDO",
     "CARLOS SAUCEDO",
-  ]
+  ];
 
   const ciudadesPorEstado = {
     Chihuahua: ["Ciudad Chihuahua", "Ciudad Juárez"],
@@ -147,20 +179,28 @@ export const CreatePropBackend = () => {
     data.estatusVenta = "PENDIENTE";
     data.comprador = "INDEFINIDO";
     data.formaPago = "INDEFINIDO";
-    
 
     data.direccion = `${data.direccion} Num Ext: ${data.numExterior} Num Int: ${data.numInterior}`;
     console.log("formData", data);
 
-    // handleFileUpload(fileName, data);
+    try {
+      if (dropZoneChange) {
+        const fileData = await handleFileUpload();
 
-    if (fileChanged) {
-      data.foto = fileName.name;
-      handleFileUpload(fileName, data);
-    } else {
-      data.foto = defaultFile;
-      data.assetid = "";
-      handleSubmitProperty(data);
+        console.log("fileData", fileData);
+
+        data.foto = fileData.secure_url;
+        data.assetid = fileData.public_id;
+        handleSubmitProperty(data);
+      } else {
+        data.foto =
+          "https://res.cloudinary.com/ddjajfmtw/image/upload/v1720735461/wl5bc6xzgbv3ell7pbbx.jpg";
+        data.assetid = "";
+        console.log("no se selecciono foto");
+        handleSubmitProperty(data);
+      }
+    } catch (error) {
+      toast.error("Error en la carga del archivo: ");
     }
   });
 
@@ -305,19 +345,19 @@ export const CreatePropBackend = () => {
 
   const handleFileUpload = async (archivo, data) => {
     const formData = new FormData();
-    formData.append("file", archivo);
+    formData.append("file", foto);
     formData.append("upload_preset", "gpfngq7n");
     formData.append("api_key", "646432361532954");
 
     try {
       const res = await fetch(
-        "https://api.cloudinary.com/v1_1/ddjajfmtw/image/upload",
+        "https://api.cloudinary.com/v1_1/ddjajfmtw/auto/upload",
         { method: "POST", body: formData }
       );
-      
 
       const dataImagen = await res.json();
       console.log("datosImagen", dataImagen);
+      return dataImagen; // Retorna el archivo subido
       // Actualizar el estado de foto en data con la URL de descarga
       data.foto = dataImagen.secure_url;
       data.assetid = dataImagen.public_id;
@@ -328,12 +368,6 @@ export const CreatePropBackend = () => {
       console.error("Error al obtener la URL de descarga:", error);
     }
   };
-
-  // useEffect(() => {
-  //   if (file) {
-  //     handleFileUpload(file);
-  //   }
-  // }, [file]);
 
   return (
     <>
@@ -435,7 +469,9 @@ export const CreatePropBackend = () => {
                 <option value="NO VIABLE">NO VIABLE</option>
                 <option value="PARTNERS">PARTNERS</option>
                 <option value="PENDIENTE">PENDIENTE</option>
-                <option value="PROMESA DE CESION DE DERECHOS ZENDERE">PROMESA DE CESION DE DERECHOS ZENDERE</option>
+                <option value="PROMESA DE CESION DE DERECHOS ZENDERE">
+                  PROMESA DE CESION DE DERECHOS ZENDERE
+                </option>
                 <option value="REMATE JUDICIAL">REMATE JUDICIAL</option>
                 <option value="RENTA">RENTA</option>
               </select>
@@ -559,8 +595,12 @@ export const CreatePropBackend = () => {
                 <option value="CESION DE DERECHO">CESION DE DERECHO</option>
                 <option value="SIN ESCRITURAR">SIN ESCRITURAR</option>
                 <option value="DOBLE ESCRITURACION">DOBLE ESCRITURACION</option>
-                <option value="ADJUDICADA DOBLE ESCRITURA">ADJUDICADA DOBLE ESCRITURA</option>
-                <option value="DERECHO ADJUDICATORIO SIN POSESION">DERECHO ADJUDICATORIO SIN POSESION</option>
+                <option value="ADJUDICADA DOBLE ESCRITURA">
+                  ADJUDICADA DOBLE ESCRITURA
+                </option>
+                <option value="DERECHO ADJUDICATORIO SIN POSESION">
+                  DERECHO ADJUDICATORIO SIN POSESION
+                </option>
               </select>
             </div>
             <div className="flex flex-col">
@@ -635,8 +675,42 @@ export const CreatePropBackend = () => {
 
             {/* BOTONES DE ACCION */}
             <div className=" flex flex-col md:flex-row md:w-[1000px] xl:flex-row xl:w-[1000px] mt-10 gap-5 w-[300px]  mx-auto">
+              {/* react dropzone */}
+
+              <div className="flex flex-col cursor-pointer">
+                <label className="font-semibold flex items-center gap-2">
+                  FOTO PROPIEDAD
+                </label>
+                <div
+                  {...getRootProps()}
+                  className="relative border-dashed border-2 border-gray-300 rounded-md p-6 bg-white h-[100px] hover:bg-slate-200"
+                >
+                  <input {...getInputProps()} />
+                  {isDragActive ? (
+                    <p className="w-[400px]">Suelte los archivos aqui...</p>
+                  ) : (
+                    <p>Suelte foto aqui, o haz clic para seleccionar</p>
+                  )}
+                </div>
+
+                <div className="mt-4">
+                  {acceptedFiles[0] && (
+                    <div>
+                      <p className="text-sm text-gray-600 font-semibold">
+                        <span className=" text-blue-600 font-semibold">
+                          {" "}
+                          Archivo seleccionado: {acceptedFiles[0].name}
+                        </span>
+                      </p>
+                      <p className="text-sm text-blue-600 font-semibold">
+                        Tipo: {acceptedFiles[0].type}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className=" flex flex-col items-center">
-                <div className="flex flex-col ">
+                {/* <div className="flex flex-col ">
                   <input
                     // onChange={(e) => setDefaultFile(e.target.files[0])}
                     type="file"
@@ -651,13 +725,23 @@ export const CreatePropBackend = () => {
                   >
                     Cargar Imagen
                   </label>
-                </div>
+                </div> */}
                 {defaultFile && ( // Renderizar la imagen solo si defaultFile es válido
-                  <img
-                    className="w-[80px] m-5 shadow-lg object-cover rounded-md"
-                    src={defaultFile}
-                    alt=""
-                  />
+                  <div className="relative inline-block">
+                    <button 
+                    onClick={()=>{
+                      setdropZoneChange(false)
+                      setDefaultFile( "https://res.cloudinary.com/ddjajfmtw/image/upload/v1720735461/wl5bc6xzgbv3ell7pbbx.jpg")
+                    }}
+                    className="absolute top-0 right-0 m-2 text-black">
+                      <IoMdCloseCircle />
+                    </button>
+                    <img
+                      className="w-[80px] m-5 shadow-lg object-cover rounded-md"
+                      src={defaultFile}
+                      alt=""
+                    />
+                  </div>
                 )}
                 <p>
                   {filePerc > 0 && filePerc < 100 ? (
@@ -706,4 +790,4 @@ export const CreatePropBackend = () => {
       </form>
     </>
   );
-}
+};

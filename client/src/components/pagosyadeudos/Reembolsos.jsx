@@ -22,10 +22,12 @@ export const Reembolsos = ({ setCurrentStep }) => {
   const [pagosData, setPagosData] = useState(pagos);
   const [checkPagos, setCheckPagos] = useState(false);
   const [loadingUpload, setloadingUpload] = useState(false);
+  const [porcentaje, setporcentaje] = useState(false);
   const isDisabledAbonado = true;
   const isDisabledReemboloso = true;
   const isDisabledDeuda = true;
   const isDisableMonto = true;
+  const isDisablePorcentaje = false;
   const { userCOntext } = useContext(UsuarioContext);
   const {
     register,
@@ -36,8 +38,13 @@ export const Reembolsos = ({ setCurrentStep }) => {
 
   //---------------------------------------------------------------------------------CALCULOS DE PAGOS Y GASTOS
   const calcularPagos = (data) => {
+    console.log("calculandoPagos...");
     if (data.reembolsosLista.length > 0) {
       console.log("calcular gastos", data.reembolsosLista);
+
+      const porcentajeExtra = data.porcentajePenalizacion ?? 0;
+
+      console.log("porcentajeExtra", porcentajeExtra);
 
       const sumaReembolsos = data.reembolsosLista
         .filter((pago) => pago.status === true)
@@ -54,7 +61,10 @@ export const Reembolsos = ({ setCurrentStep }) => {
         )
         .reduce((total, pago) => total + pago.cantidadPago, 0);
 
-      setMonto(sumaPagos);
+      // Agrega el porcentajeExtra al total de sumaPagos
+      const montoConPorcentaje = sumaPagos * (1 + porcentajeExtra / 100);
+
+      setMonto(montoConPorcentaje);
 
       setReembolso(sumaReembolsos);
 
@@ -66,6 +76,7 @@ export const Reembolsos = ({ setCurrentStep }) => {
 
       setDeuda(deuda);
     } else {
+      const porcentajeExtra = data.porcentajePenalizacion ?? 0;
       const sumaPagos = data.pagosLista
         .filter(
           (pago) =>
@@ -76,7 +87,9 @@ export const Reembolsos = ({ setCurrentStep }) => {
               pago.tipoPago === "LIQUIDACION")
         )
         .reduce((total, pago) => total + pago.cantidadPago, 0);
-      setMonto(sumaPagos);
+
+      const montoConPorcentaje = sumaPagos * (1 + porcentajeExtra / 100);
+      setMonto(montoConPorcentaje);
     }
   };
 
@@ -178,6 +191,27 @@ export const Reembolsos = ({ setCurrentStep }) => {
   const onSubmit = handleSubmit((data) => {
     console.log("formData", data);
     console.log("userContext", userCOntext);
+
+    if (porcentaje) {
+
+      console.log("Cambiando %")
+      const inputPorcentaje = data.porcentajePenalizacion.replace(
+        /[^0-9]/g,
+        ""
+      );
+      data.porcentajePenalizacion = parseFloat(inputPorcentaje);
+      console.log("inputPorcentaje", inputPorcentaje);
+      setCheckPagos(true);
+      // Actualizar el contexto con los nuevos datos
+      setPagosData((prevPagos) => ({
+        ...prevPagos,
+        // Actualizar los campos necesarios con los datos del formulario
+        porcentajePenalizacion: data.porcentajePenalizacion,
+      }));
+
+      return;
+    }
+
     setloadingUpload(true);
     setCheckPagos(true);
     const fechaVentaInput = new Date();
@@ -250,13 +284,51 @@ export const Reembolsos = ({ setCurrentStep }) => {
   return (
     <>
       {pagosData ? (
-       <div className="form-container mt-10 flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
+        <div className="form-container mt-10 flex flex-col items-center w-full  lg:w-[1000px] max-w-[1500px] bg-[#f3f4f6]">
           <div className="form-header bg-black text-white w-full h-10 p-2 rounded-tl-md rounded-tr-md">
             REEMBOLSOS
           </div>
 
           <form onSubmit={onSubmit}>
-          <div className="flex flex-col gap-8  p-6 w-full">
+            <div className="flex flex-col gap-8  p-6 w-full">
+              <div className="flex gap-5 items-end">
+                <div className="flex flex-col">
+                  <label className="font-semibold">
+                    PORCENTAJE PENALIZACION
+                  </label>
+                  <input
+                    value={`%${pagosData.porcentajePenalizacion ?? 0}`}
+                    {...register("porcentajePenalizacion", { required: true })}
+                    type="text"
+                    className="border p-2 rounded-md shadow-sm"
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      const inputPrecio = e.target.value.replace(/[^0-9]/g, "");
+                      console.log("inputPrecio", inputPrecio);
+                      // Formatear con comas y agregar el símbolo de peso
+                      const formattedPrecio = `${inputPrecio.replace(
+                        /\B(?=(\d{3})+(?!\d))/g,
+                        ","
+                      )}`;
+                      setPagosData((prevDatos) => ({
+                        ...prevDatos,
+                        porcentajePenalizacion: formattedPrecio,
+                      }));
+                      // setValue("precioFinal", inputPrecio);
+                    }}
+                    // {...register("precioFinal", { required: true })}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    setporcentaje(true);
+                  }}
+                  className=" text-white bg-black p-2 text-[13px] rounded-md"
+                >
+                  Actualizar %
+                </button>
+              </div>
+
               {/* Columna ARRIBA */}
               <div className=" flex flex-col md:flex-row gap-5 items-center justify-around bg-white p-4 rounded-lg shadow-xl">
                 <div className="mb-4 flex flex-col">
@@ -340,7 +412,7 @@ export const Reembolsos = ({ setCurrentStep }) => {
                 <div className=" flex flex-col w-full">
                   <label className=" font-medium w-full">CANTIDAD</label>
                   <input
-                    {...register("cantidadPago", { required: true })}
+                    {...register("cantidadPago", { required: false })}
                     value={cantidad}
                     onChange={(e) => {
                       handlePrecioChange(e);
@@ -373,7 +445,7 @@ export const Reembolsos = ({ setCurrentStep }) => {
               <div className=" flex flex-col">
                 <label className=" font-medium">OBSERVACIONES</label>
                 <textarea
-                  {...register("observacionPago", { required: true })}
+                  {...register("observacionPago", { required: false })}
                   // value={`$${monto.toLocaleString()}`}
                   // onChange={(e) => {
                   //   handlePrecioChange(e);
@@ -390,7 +462,7 @@ export const Reembolsos = ({ setCurrentStep }) => {
           {/* DISEÑO DE TABLA PAR AMOSTRAR INFORMACION */}
           <div className="md:w-[800px] lg:w-[900px] xl:w-[950px] overflow-x-auto w-[340px]">
             {pagosData.reembolsosLista.length > 0 ? (
-               <table className="w-full mt-4 bg-white rounded-md shadow-md mb-4 overflow-x-auto">
+              <table className="w-full mt-4 bg-white rounded-md shadow-md mb-4 overflow-x-auto">
                 <thead>
                   <tr>
                     <th className="border p-2">USUARIO</th>

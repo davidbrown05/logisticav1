@@ -253,7 +253,7 @@ export const ButtonDuplicar = ({ id, setduplicarPropiedad }) => {
     );
 
     toast.success("PROPIEDAD DUPLICADA");
-    setInmuebles([...inmuebles, inmueble]);
+    setInmuebles([...inmuebles, responseNewInmueble]);
   };
 
   return (

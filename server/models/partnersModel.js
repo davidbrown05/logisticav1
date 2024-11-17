@@ -64,6 +64,10 @@ const PartnersSchema = new mongoose.Schema(
       type: Array,
       required: false,
     },
+    tipoTabla: {
+      type: String,
+      required: false,
+    },
     status: {
       type: String,
       required: false,

@@ -13,25 +13,24 @@ import { NextUIProvider } from "@nextui-org/react";
 import { juridicoStore } from "./redux/juridicoStore.js";
 import RecordatoriosProvider from "./context/RecordatoriosContext.jsx";
 import { LoaderProvider } from "./context/LoaderContext.jsx";
+import { PropertyMenuProvider } from "./context/PropertyMenuContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <LoaderProvider>
-  <RecordatoriosProvider>
-  <AuthProvider>
+  
+      <RecordatoriosProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Provider store={store}>
+              <PersistGate loading={null} persistor={persistor}>
+                <NextUIProvider>
+                  <App />
+                </NextUIProvider>
+              </PersistGate>
+            </Provider>
+          </BrowserRouter>
+        </AuthProvider>
+      </RecordatoriosProvider>
    
-      <BrowserRouter>
-       
-          <Provider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
-              <NextUIProvider>
-                <App />
-              </NextUIProvider>
-            </PersistGate>
-          </Provider>
-       
-      </BrowserRouter>
-   
-  </AuthProvider>
-  </RecordatoriosProvider>
   </LoaderProvider>
 );

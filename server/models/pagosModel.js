@@ -19,6 +19,10 @@ const PagosSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    porcentajePenalizacion: {
+      type: Number,
+      required: false,
+    },
 
     pagosLista: {
       type: Array,
@@ -33,6 +37,7 @@ const PagosSchema = new mongoose.Schema(
       type: Array,
       required: false,
     },
+
     empresaLista: {
       type: Array,
       required: false,

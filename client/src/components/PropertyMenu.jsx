@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { BsBank2 } from "react-icons/bs";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 
 import {
   RiHome8Fill,
@@ -17,27 +18,31 @@ import {
   FaChartArea,
   FaTrashAlt,
   FaEdit,
-  
 } from "react-icons/fa";
 import { BsCalendar2DateFill } from "react-icons/bs";
 
-import { NavLink, useLocation } from "react-router-dom";
 import { VerPropiedadModal } from "./VerPropiedadModal";
+import { InmuebleContext } from "../context/InmuebleContext";
+
 
 export const PropertyMenu = ({
   propertyMenu,
   setPropertyMenu,
   item,
-  getPropiedades,
   openModal,
-  setopenModal
+  setopenModal,
 }) => {
+  const verPropiedad = () => {
+    setopenModal(!openModal);
+  };
 
+  const { inmuebles, loadingInmuebles, setInmuebles } =
+    useContext(InmuebleContext);
 
-  const verPropiedad = () =>{
-    setopenModal(!openModal)
-  }
-  
+    
+
+  const navigate = useNavigate();
+
   const deleteProperty = async () => {
     const result = await Swal.fire({
       title: `Eliminar ${item.direccion}`,
@@ -93,7 +98,7 @@ export const PropertyMenu = ({
           `http://localhost:3000/api/adeudosData/${adeudosId}`
         );
         const responseDeletePagos = await axios.delete(
-           `http://localhost:3000/api/pagosData/${pagosId}`
+          `http://localhost:3000/api/pagosData/${pagosId}`
         );
         const responseDeleteComisiones = await axios.delete(
           `http://localhost:3000/api/comisionesData/${comisionesId}`
@@ -105,9 +110,13 @@ export const PropertyMenu = ({
         const responseDeleteProperty = await axios.delete(
           `http://localhost:3000/api/products/${item._id}`
         );
+        // Actualiza el estado de inmuebles eliminando el inmueble correspondiente
+        setInmuebles((prevInmuebles) =>
+          prevInmuebles.filter((inmueble) => inmueble._id !== item._id)
+        );
 
         toast.success("PROPIEDAD ELIMINADA");
-        getPropiedades();
+        navigate("/inventario");
       } catch (error) {
         toast.error(error);
       }
@@ -209,62 +218,70 @@ export const PropertyMenu = ({
 
   return (
     <>
-    <VerPropiedadModal openModal={openModal} setopenModal={setopenModal} setPropertyMenu={setPropertyMenu} propertyMenu={propertyMenu} item={item}/>
-    <div>
-      <div
-        className={`fixed bg-black px-3 top-0 w-80 lg:w-[400px] h-full flex flex-col justify-between py-6 z-50 transition-all ${
-          propertyMenu ? "right-0" : "-right-full"
-        } overflow-y-auto`}
-      >
-        <div className="overflow-y-auto">
-          <div className="flex flex-col items-center">
-            <img src={item.foto} className=" h-[100px] w-[100px] rounded-lg" />
-            <h1 className="text-md text-gray-300 uppercase font-bold text-center my-5">
-              {item.direccion}
-            </h1>
-          </div>
-          <ul className="pl-4">
-            {optionsToMap.map((option, index) => (
-              <li
-                onClick={() => {
-                  // Ejecuta la función onClick si está definida
-                  if (option.onClick) {
-                    option.onClick();
-                  }
-                  setPropertyMenu(!propertyMenu);
-                }}
-                key={index}
-                className="hover:bg-[#262837] p-4 rounded-tl-xl rounded-bl-xl group transition-colors"
-              >
-                <NavLink
-                  to={option.to}
-                  // isActive={() => {
-                  //     // Comprueba si la ubicación actual coincide con la ruta del NavLink
-                  //     return location.pathname === option.to;
-                  //   }}
-                  className={`${
-                    location.pathname === option.to ? "bg-[#e43434]" : ""
-                  } group-hover:bg-[#e43434] p-2 flex gap-4 items-center rounded-xl text-white group-hover:text-white transition-colors`}
-                >
-                  {option.icon}
-                  {option.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      {/* overlay */}
-      {propertyMenu ? (
+      <VerPropiedadModal
+        openModal={openModal}
+        setopenModal={setopenModal}
+        setPropertyMenu={setPropertyMenu}
+        propertyMenu={propertyMenu}
+        item={item}
+      />
+      <div>
         <div
-          onClick={() => setPropertyMenu(!propertyMenu)}
-          className="bg-black/80 fixed w-full h-screen z-30 top-0 left-0 "
-        ></div>
-      ) : (
-        ""
-      )}
-    </div>
+          className={`fixed bg-black px-3 top-0 w-80 lg:w-[400px] h-full flex flex-col justify-between py-6 z-50 transition-all ${
+            propertyMenu ? "right-0" : "-right-full"
+          } overflow-y-auto`}
+        >
+          <div className="overflow-y-auto">
+            <div className="flex flex-col items-center">
+              <img
+                src={item.foto}
+                className=" h-[100px] w-[100px] rounded-lg"
+              />
+              <h1 className="text-md text-gray-300 uppercase font-bold text-center my-5">
+                {item.direccion}
+              </h1>
+            </div>
+            <ul className="pl-4">
+              {optionsToMap.map((option, index) => (
+                <li
+                  onClick={() => {
+                    // Ejecuta la función onClick si está definida
+                    if (option.onClick) {
+                      option.onClick();
+                    }
+                    setPropertyMenu(!propertyMenu);
+                  }}
+                  key={index}
+                  className="hover:bg-[#262837] p-4 rounded-tl-xl rounded-bl-xl group transition-colors"
+                >
+                  <NavLink
+                    to={option.to}
+                    // isActive={() => {
+                    //     // Comprueba si la ubicación actual coincide con la ruta del NavLink
+                    //     return location.pathname === option.to;
+                    //   }}
+                    className={`${
+                      location.pathname === option.to ? "bg-[#e43434]" : ""
+                    } group-hover:bg-[#e43434] p-2 flex gap-4 items-center rounded-xl text-white group-hover:text-white transition-colors`}
+                  >
+                    {option.icon}
+                    {option.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        {/* overlay */}
+        {propertyMenu ? (
+          <div
+            onClick={() => setPropertyMenu(!propertyMenu)}
+            className="bg-black/80 fixed w-full h-screen z-30 top-0 left-0 "
+          ></div>
+        ) : (
+          ""
+        )}
+      </div>
     </>
   );
-  
 };

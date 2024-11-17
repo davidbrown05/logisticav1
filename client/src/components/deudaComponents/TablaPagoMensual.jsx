@@ -70,6 +70,29 @@ export const TablaPagoMensual = ({
   };
 
   // Actualizar el estado del préstamo con el valor numérico
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   if (name === "monto") {
+  //     const numericValue = parseCurrency(value);
+  //     setPrestamo((prev) => ({
+  //       ...prev,
+  //       [name]: numericValue,
+  //     }));
+  //   } else if (name === "tasaInteres") {
+  //     const numericValue = parsePercentage(value);
+  //     setPrestamo((prev) => ({
+  //       ...prev,
+  //       [name]: numericValue,
+  //     }));
+  //   } else {
+  //     setPrestamo((prev) => ({
+  //       ...prev,
+  //       [name]: value,
+  //     }));
+  //   }
+  // };
+  // Actualizar el estado del préstamo con el valor numérico
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -85,6 +108,13 @@ export const TablaPagoMensual = ({
         ...prev,
         [name]: numericValue,
       }));
+    } else if (name === "plazo") {
+      // Sincroniza "parcialidades" con "plazo"
+      setPrestamo((prev) => ({
+        ...prev,
+        [name]: parseInt(value, 10) || 0,
+        parcialidades: parseInt(value, 10) || 0,
+      }));
     } else {
       setPrestamo((prev) => ({
         ...prev,
@@ -99,6 +129,7 @@ export const TablaPagoMensual = ({
     setTimeout(() => {
       setpartnerInfo((prevPartnerInfo) => ({
         ...prevPartnerInfo, // Mantenemos todos los valores actuales del partnerInfo
+        tipoTabla:"pagomensual",
         pagosFinales: tabla, // Actualizamos solo el campo pagosFinales
       }));
     }, 500);
@@ -110,9 +141,6 @@ export const TablaPagoMensual = ({
       handlePartner(partnerInfo);
     }
   }, [partnerInfo]);
-
- 
-
 
   const handlePartner = async (data) => {
     const result = await Swal.fire({
@@ -159,11 +187,11 @@ export const TablaPagoMensual = ({
   }, [prestamo, pagosAdicionales]);
 
   const handlePagoAdicional = (mes, valor) => {
-    setPagosAdicionales(prev => ({
+    setPagosAdicionales((prev) => ({
       ...prev,
       [mes]: parseFloat(valor) || 0,
-    }))
-  }
+    }));
+  };
 
   const calcularTabla = () => {
     const { monto, tasaInteres, plazo, parcialidades, fechaInicial } = prestamo;
@@ -202,7 +230,7 @@ export const TablaPagoMensual = ({
         pagoTotal: Number(pagoTotal.toFixed(2)),
         saldoFinal: Number(saldoFinal.toFixed(2)),
         pagoAdicional: Number(pagoAdicional.toFixed(2)),
-
+        tipoTabla: "pagomensual",
         fechaPagoRealizado: "",
         pagoAdicionalArray: [],
         abonos: [],
@@ -297,6 +325,7 @@ export const TablaPagoMensual = ({
               value={prestamo.parcialidades}
               onChange={handleInputChange}
               className={`border p-2 rounded-md shadow-sm `}
+              disabled={true}
             />
           </div>
           <div>

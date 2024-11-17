@@ -301,6 +301,8 @@ export const PagosEmpresa = () => {
           <form onSubmit={onSubmit}>
            
           <div className="flex flex-col gap-8  p-6 w-full">
+
+            
               {/* Columna ARRIBA */}
               <div className=" flex gap-5 items-center justify-around bg-white p-4 rounded-lg shadow-xl">
                 <div className="mb-4 flex flex-col">

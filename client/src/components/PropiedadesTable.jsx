@@ -107,7 +107,11 @@ export const PropiedadesTable = () => {
                   <td className="border px-4 py-2">
                     <img
                       className="rounded-md"
-                      src={expediente.foto}
+                      src={
+                        expediente.foto
+                          ? expediente.foto
+                          : "https://res.cloudinary.com/ddjajfmtw/image/upload/v1720735461/wl5bc6xzgbv3ell7pbbx.jpg"
+                      }
                       alt={`Imagen de expediente ${expediente.numeroExpediente}`}
                       style={{ maxWidth: "50px", maxHeight: "50px" }}
                     />

@@ -35,7 +35,6 @@ export const PagosFinalestabs = ({
 
   console.log("pagosFinales", pagosFinales);
 
- 
   const [openPagosFInalModal, setopenPagoasFinalModal] = useState(false);
   const [openPagosAdicionalesModal, setopenPagosAdicionalesModal] =
     useState(false);
@@ -174,32 +173,29 @@ export const PagosFinalestabs = ({
 
     if (result.isConfirmed) {
       setcheckStatus(true);
-     
 
       try {
-
-         // Subir documento
-         const fileData = await handleFileUpload();
-         console.log("fileData", fileData);
-         // Verificar si hay un error en la carga del archivo
-         if (fileData?.error) {
-           console.error(
-             "Error en la carga del archivo:",
-             fileData.error.message
-           );
-           toast.error(
-             "Error en la carga del archivo: " + fileData.error.message
-           );
-           return; // Detener el proceso si hay un error en el archivo
-         }
+        // Subir documento
+        const fileData = await handleFileUpload();
+        console.log("fileData", fileData);
+        // Verificar si hay un error en la carga del archivo
+        if (fileData?.error) {
+          console.error(
+            "Error en la carga del archivo:",
+            fileData.error.message
+          );
+          toast.error(
+            "Error en la carga del archivo: " + fileData.error.message
+          );
+          return; // Detener el proceso si hay un error en el archivo
+        }
 
         // Actualizar el status de partnerInfo a "finalizado"
         setpartnerInfo({
           ...partnerInfo,
           status: "done", // Cambiamos el status directamente
           assetid: fileData.public_id,
-          documento:fileData.secure_url
-
+          documento: fileData.secure_url,
         });
       } catch (error) {
         setcheckStatus(false);
@@ -446,8 +442,17 @@ export const PagosFinalestabs = ({
 
                     const tasaInteres = partnerInfo.porcentajeUtilidad;
 
-                    const pagoInteres =
-                      (saldoInicialAjustado * (tasaInteres / 100)) / 10;
+                    let pagoInteres;
+                    if (pago.tipoTabla === "pagomensual") {
+                      pagoInteres =
+                        (saldoInicialAjustado * (tasaInteres / 100)) / 10;
+                    }
+                    if (pago.tipoTabla === "pagounico") {
+                      //CUANDO ES PAGO UNICO EN VES DE SER ENTRE 10 TIENE QUE SER ENTRE EL NUMERO DE MESES
+                      pagoInteres =
+                        (saldoInicialAjustado * (tasaInteres / 100)) /
+                        pagosFinales.length;
+                    }
 
                     const pagoTotal = pagoCapitalAjustado1 + pagoInteres;
 
